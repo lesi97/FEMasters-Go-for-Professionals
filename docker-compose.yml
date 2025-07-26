@@ -1,0 +1,13 @@
+services:
+    db:
+        container_name: 'workoutDB'
+        image: postgres:12.4-alpine
+        volumes:
+            - './database/postgres-data:/var/lib/postgresql/data:rw' # Local path : docker path : read/write
+        ports:
+            - '5432:5432' # Binding the default postgres port to same port on local pc # 1st is local port, 2nd is within container
+        environment:
+            POSTGRES_DB: 'postgres'
+            POSTGRES_USER: 'postgres'
+            POSTGRES_PASSWORD: 'postgres'
+        restart: unless-stopped
