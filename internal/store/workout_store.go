@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 )
 
 type WorkoutStore interface {
@@ -89,7 +90,7 @@ func (pg *PostgresWorkoutStore) GetWorkoutById(id int64) (*Workout, error) {
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, fmt.Errorf("no data for workout")
 	}
 
 	if err != nil {
@@ -124,7 +125,13 @@ func (pg *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error
 		RETURNING id;
 	`
 
-	err = tx.QueryRow(query, workout.Title, workout.Description, workout.DurationMinutes, workout.CaloriesBurned).Scan(&workout.ID)
+	err = tx.QueryRow(
+		query, 
+		workout.Title, 
+		workout.Description, 
+		workout.DurationMinutes, 
+		workout.CaloriesBurned,
+	).Scan(&workout.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +152,17 @@ func (pg *PostgresWorkoutStore) CreateWorkout(workout *Workout) (*Workout, error
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			RETURNING id;
 		`
-		err = tx.QueryRow(query, workout.ID, entry.ExerciseName, entry.Sets, entry.Reps, entry.DurationSeconds, entry.Weight, entry.Notes, entry.OrderIndex).Scan(&entry.ID)
+		err = tx.QueryRow(
+			query, 
+			workout.ID, 
+			entry.ExerciseName, 
+			entry.Sets, 
+			entry.Reps, 
+			entry.DurationSeconds, 
+			entry.Weight, 
+			entry.Notes, 
+			entry.OrderIndex,
+		).Scan(&entry.ID)
 		if err != nil {
 			return nil, err
 		}
